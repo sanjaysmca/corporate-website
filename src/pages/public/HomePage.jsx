@@ -58,10 +58,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              We Build Digital Products{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-primary-300">
-                That Matter
-              </span>
+              We Build Digital Products That Matter
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-10 max-w-2xl">
               NexusCorp partners with ambitious companies to deliver web applications, mobile apps,

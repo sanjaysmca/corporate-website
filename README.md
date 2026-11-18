@@ -258,3 +258,64 @@ GitHub: https://github.com/sanjaysmca
 ---
 
 *Developed as part of a full-stack development practical assignment.*
+
+---
+
+## 13. Screenshots
+
+### Public Website
+
+**Homepage**
+![Homepage](docs/screenshots/01-homepage.png)
+
+---
+
+**About**
+![About Page](docs/screenshots/02-aboutpage.png)
+
+---
+
+**Services**
+![Services Page](docs/screenshots/03-servicepage.png)
+
+---
+
+**Projects**
+![Projects Page](docs/screenshots/04-projectspage.png)
+
+---
+
+**Contact**
+![Contact Page](docs/screenshots/05-contactpage.png)
+
+---
+
+### Admin Dashboard
+
+**Admin Login**
+![Admin Login](docs/screenshots/06-admin_loginpage.png)
+
+---
+
+**Dashboard**
+![Admin Dashboard](docs/screenshots/07-admin_dhashboard.png)
+
+---
+
+**Project Management**
+![Project Management](docs/screenshots/08-admin_projects.png)
+
+---
+
+**Service Management**
+![Service Management](docs/screenshots/09-admin_services.png)
+
+---
+
+**Enquiry Management**
+![Enquiry Management](docs/screenshots/10-admin_enquiries.png)
+
+---
+
+**Media Management**
+![Media Management](docs/screenshots/11-admin_media.png)

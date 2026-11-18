@@ -85,7 +85,7 @@ export default function ContactPage() {
       {/* ── Page hero ── */}
       <section className="bg-gradient-to-br from-gray-900 to-primary-900 py-20 lg:py-28">
         <div className="section-container text-center">
-          <span className="text-xs font-semibold tracking-widest uppercase text-primary-300 mb-4 block">
+          <span className="text-xs font-semibold tracking-widest uppercase text-primary-100 mb-4 block">
             Get in Touch
           </span>
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-5 leading-tight">
@@ -132,10 +132,6 @@ export default function ContactPage() {
                 </div>
               ))}
 
-              {/* Map placeholder */}
-              <div className="mt-6 rounded-xl overflow-hidden border border-gray-100 h-52 bg-gray-100 flex items-center justify-center">
-                <span className="text-sm text-gray-400">Map Embed (Google Maps)</span>
-              </div>
             </div>
 
             {/* ── Enquiry form ── */}

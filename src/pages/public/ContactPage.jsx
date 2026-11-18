@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, AlertCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { supabasePublic } from '../../lib/supabase'
 
 /* ── Zod schema — mirrors DB CHECK constraints ── */
 const enquirySchema = z.object({
@@ -66,12 +66,11 @@ export default function ContactPage() {
       ...(data.subject?.trim() ? { subject: data.subject.trim() } : {}),
     }
 
-    // Do NOT chain .select() here — the anon RLS policy on enquiries allows
-    // INSERT but has no SELECT grant, so reading back the inserted row would
-    // return a PGRST301 permission error even on a successful submission.
-    // A plain .insert() returns { error: null } on HTTP 201 Created, which is
-    // the correct success signal for an insert-only public table.
-    const { error } = await supabase.from('enquiries').insert([payload])
+    // supabasePublic is a session-free client (persistSession: false).
+    // It always sends requests as the `anon` role regardless of any active
+    // admin session in localStorage — matching the "enquiries: public can insert"
+    // RLS policy which is scoped TO anon.
+    const { error } = await supabasePublic.from('enquiries').insert([payload])
 
     if (error) {
       // Log the full error object so the real code/hint/details are visible

@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL | `NOW()` | Auto-updated by trigger |
 
 > [!IMPORTANT]
-> The `role` column is protected by a `BEFORE UPDATE` trigger (`trg_prevent_role_change`) that prevents any application-level UPDATE from changing the role value. Only a database superuser operating outside the trigger context can alter a role.
+> The `role` column is protected by a `BEFORE UPDATE` trigger (`trg_prevent_role_change`). Any application-level UPDATE that attempts to change the `role` value — whether via the REST API, the Supabase client, or a SECURITY DEFINER function — is rejected with SQLSTATE `23514`. Role values can only be changed by a database-level administrator operating directly in the Supabase SQL Editor (outside the application's API layer).
 
 ---
 
@@ -738,7 +738,7 @@ Request
 
 - **No service-role key in the frontend.** The application uses only the Supabase `anon` key with RLS enforcing access.
 - **No public registration.** `profiles.role` has a `CHECK (role IN ('admin'))` constraint — only the admin role is valid.
-- **Role self-promotion blocked.** The `trg_prevent_role_change` trigger fires on every UPDATE path (including SECURITY DEFINER functions) and raises SQLSTATE `23514` if `OLD.role IS DISTINCT FROM NEW.role`.
+- **Role self-promotion blocked.** The `trg_prevent_role_change` trigger fires on every application-level UPDATE path — including via PostgREST, the Supabase client, and SECURITY DEFINER functions — and raises SQLSTATE `23514` if `OLD.role IS DISTINCT FROM NEW.role`. Role changes require direct database-level access in the Supabase SQL Editor.
 - **CWE-427 mitigation.** All four functions set `search_path = public, pg_catalog` to prevent schema search-path injection attacks.
 - **Enquiry PII protection.** No SELECT policy exists for `anon` on the `enquiries` table.
 - **Storage MIME and size enforcement.** Restricted to five image MIME types and 10 MB maximum, enforced at both the bucket level and the `media` table CHECK constraint.
@@ -750,33 +750,12 @@ Request
 | Migration | Status | Description |
 |-----------|--------|-------------|
 | `001_initial_schema.sql` | ✅ **Executed in production** | Tables, indexes, triggers, initial RLS policies, storage bucket, `get_dashboard_stats()` |
-| `002_security_fixes.sql` | ⚠️ **Superseded** | Intermediate fix — superseded by 003; run 001 → 003, skip 002 |
-| `003_security_hardening.sql` | 🔲 **Not yet executed** | Adds `is_admin()`, hardens all write policies, adds `prevent_role_change` trigger, adds safe `search_path` to all functions |
+| `002_security_fixes.sql` | ~~Superseded~~ **Not required** | Intermediate fix — fully superseded by 003; do not apply |
+| `003_security_hardening.sql` | ✅ **Executed in production** | Adds `is_admin()`, hardens all write policies, adds `prevent_role_change` trigger, adds safe `search_path` to all functions |
 
-> [!CAUTION]
-> Do **not** run migration 002 if 003 has already been applied, and do **not** run 002 before 003. Migration 003 is designed to be safe regardless of whether 002 was previously executed (all DROPs use `IF EXISTS`).
-
-### How to apply migration 003
-
-1. Open **Supabase Dashboard → SQL Editor → New Query**
-2. Paste the entire contents of `supabase/migrations/003_security_hardening.sql`
-3. Click **Run**
-4. Verify using the commented verification queries at the bottom of the file
-
-### Post-migration: create the first admin user
-
-After running migration 003, create an admin account:
-
-1. **Supabase Dashboard → Authentication → Users → Add User**
-2. Enter email and password
-3. Copy the generated UUID
-4. Run in SQL Editor:
-
-```sql
-INSERT INTO public.profiles (id, full_name, role)
-VALUES ('<uuid-from-auth.users>', 'Admin Name', 'admin');
-```
+> [!NOTE]
+> All three migrations are now accounted for in production. Migration 002 was superseded before execution and is not required. The active schema is the result of running 001 followed by 003.
 
 ---
 
-*Documentation sourced exclusively from `supabase/migrations/001_initial_schema.sql` and `supabase/migrations/003_security_hardening.sql`. Last updated: 2026-11-18.*
+*Documentation sourced exclusively from `supabase/migrations/001_initial_schema.sql` and `supabase/migrations/003_security_hardening.sql`. Last updated: 2026-11-18 — migration 003 marked as executed in production.*

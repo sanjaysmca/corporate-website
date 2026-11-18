@@ -66,12 +66,34 @@ export default function ContactPage() {
       ...(data.subject?.trim() ? { subject: data.subject.trim() } : {}),
     }
 
+    // Do NOT chain .select() here — the anon RLS policy on enquiries allows
+    // INSERT but has no SELECT grant, so reading back the inserted row would
+    // return a PGRST301 permission error even on a successful submission.
+    // A plain .insert() returns { error: null } on HTTP 201 Created, which is
+    // the correct success signal for an insert-only public table.
     const { error } = await supabase.from('enquiries').insert([payload])
 
     if (error) {
-      // Map Supabase error codes to user-friendly messages
+      // Log the full error object so the real code/hint/details are visible
+      // in the browser console and in Vercel runtime logs for diagnosis.
+      console.error('[Contact form] Supabase insert error:', {
+        code:    error.code,
+        message: error.message,
+        details: error.details,
+        hint:    error.hint,
+      })
+
+      // Map known Supabase/PostgREST error codes to clear user-facing messages.
+      // PGRST301 — RLS blocked the INSERT (row-level security denial)
+      // 42501     — PostgreSQL insufficient_privilege
+      // 23514     — PostgreSQL check_violation (a DB CHECK constraint failed)
       let msg = 'Failed to send your message. Please try again.'
-      if (error.code === '23514') msg = 'Your submission contains invalid data. Please check the form and try again.'
+      if (error.code === 'PGRST301' || error.code === '42501') {
+        msg = 'Your message could not be submitted due to a configuration issue. Please try again or contact us directly.'
+      } else if (error.code === '23514') {
+        msg = 'Your submission contains invalid data. Please check the form fields and try again.'
+      }
+
       setServerError(msg)
       setSubmitState('error')
     } else {
